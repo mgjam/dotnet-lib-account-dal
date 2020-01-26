@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="DynamoDbAccountService.fs" />
+    <Compile Include="DynamoDbAccountDAL.fs" />
   </ItemGroup>
 
   <ItemGroup>

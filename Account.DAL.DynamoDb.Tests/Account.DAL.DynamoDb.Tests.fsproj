@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <None Include="readme.md" />
-    <Compile Include="DynamoDbAccountServiceTests.fs" />
+    <Compile Include="DynamoDbAccountDALTests.fs" />
   </ItemGroup>
 
   <ItemGroup />

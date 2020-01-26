@@ -18,7 +18,7 @@ type UpdateResult =
     | Account of Account
     | AccountNotFound
 
-type IAccountService = 
+type IAccountDAL = 
     abstract member CreateAccount: 
         account: Account ->
         Async<CreateAccountResult>

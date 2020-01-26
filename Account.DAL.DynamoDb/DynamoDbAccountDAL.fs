@@ -7,15 +7,15 @@ open System.Linq
 open System
 open System.Collections.Generic
 
-type DynamoDbAccountServiceConfig = 
+type DynamoDbAccountDALConfig = 
     { TableName: string
       PKColumnName: string
       TimeoutMs: int option }
 
 /// DynamoDb DAL for accounts
 /// <exception cref="System.Threading.Tasks.TaskCanceledException">Thrown on timeout.</exception>
-type DynamoDbAccountService
-    ( cfg: DynamoDbAccountServiceConfig,
+type DynamoDbAccountDAL
+    ( cfg: DynamoDbAccountDALConfig,
       ddb: IAmazonDynamoDB ) =
 
     let emailColumnName = "Email"
@@ -49,7 +49,7 @@ type DynamoDbAccountService
         do req.ReturnValues <- ReturnValue.ALL_NEW
         req
 
-    interface IAccountService with
+    interface IAccountDAL with
         member this.CreateAccount account = async {
             try
                 use src = tknsrc()

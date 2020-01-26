@@ -8,7 +8,7 @@ open Amazon.Runtime
 open Account.DAL
 
 [<TestFixture>]
-type DynamoDbAccountServiceTests() =
+type DynamoDbAccountDALTests() =
 
     let adc = AmazonDynamoDBConfig()
     do adc.ServiceURL <- "http://localhost:8000"
@@ -22,7 +22,7 @@ type DynamoDbAccountServiceTests() =
         let tables = ddb.ListTablesAsync().Result
         if tables.TableNames |> Seq.contains "test" then do ddb.DeleteTableAsync(DeleteTableRequest("test")).Result |> ignore
 
-    let getTestee () = DynamoDbAccountService(cfg, ddb) :> IAccountService
+    let getTestee () = DynamoDbAccountDAL(cfg, ddb) :> IAccountDAL
 
     let getacc () = 
         { Username = "mgjam"
