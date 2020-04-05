@@ -15,7 +15,7 @@ type DynamoDbAccountDALTests() =
     let ddb = new AmazonDynamoDBClient(BasicAWSCredentials("xxx", "xxx"), adc)
     let cfg =
         { TableName = "test"
-          PKColumnName = "Username"
+          PKColumnName = "Login"
           TimeoutMs = None }
 
     let deltbl () = 
@@ -25,8 +25,7 @@ type DynamoDbAccountDALTests() =
     let getTestee () = DynamoDbAccountDAL(cfg, ddb) :> IAccountDAL
 
     let getacc () = 
-        { Username = "mgjam"
-          Email = "12131213@seznam.cz"
+        { Login = "mgjam"
           PasswordHash = "ph"
           Tags = [ ("tag", "value") ; ("tag2", "value2") ] |> Map.ofSeq }
 
@@ -51,25 +50,25 @@ type DynamoDbAccountDALTests() =
         | _ -> Assert.Fail()
 
     [<Test>]
-    member this.``Should Not Create Account When Username Already Exists`` () =
+    member this.``Should Not Create Account When Login Already Exists`` () =
         let account = getacc()
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
         let result = getTestee().CreateAccount account |> Async.RunSynchronously
         match result with
-        | CreateAccountResult.UsernameAlreadyExists -> Assert.Pass()
+        | CreateAccountResult.LoginAlreadyExists -> Assert.Pass()
         | _ -> Assert.Fail()
 
     [<Test>]
     member this.``Should Verify Password Successfully`` () =
         let account = getacc()
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
-        let result = getTestee().VerifyPassword account.Username account.PasswordHash |> Async.RunSynchronously
+        let result = getTestee().VerifyPassword account.Login account.PasswordHash |> Async.RunSynchronously
         match result with
         | PasswordResult.Account a -> Assert.AreEqual(account, a)
         | _ -> Assert.Fail()
 
     [<Test>]
-    member this.``Should Not Verify Password When Invalid Username`` () =
+    member this.``Should Not Verify Password When Invalid Login`` () =
         let account = getacc()
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
         let result = getTestee().VerifyPassword "wrong" account.PasswordHash |> Async.RunSynchronously
@@ -81,7 +80,7 @@ type DynamoDbAccountDALTests() =
     member this.``Should Not Verify Password When Invalid Password`` () =
         let account = getacc()
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
-        let result = getTestee().VerifyPassword account.Username "wrong" |> Async.RunSynchronously
+        let result = getTestee().VerifyPassword account.Login "wrong" |> Async.RunSynchronously
         match result with
         | PasswordResult.PasswordInvalid -> Assert.Pass()
         | _ -> Assert.Fail()
@@ -91,7 +90,7 @@ type DynamoDbAccountDALTests() =
         let account = getacc()
         let newPasswordHash = "ph2"
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
-        let result = getTestee().ChangePassword account.Username account.PasswordHash newPasswordHash |> Async.RunSynchronously
+        let result = getTestee().ChangePassword account.Login account.PasswordHash newPasswordHash |> Async.RunSynchronously
         match result with
         | PasswordResult.Account a -> Assert.AreEqual(newPasswordHash, a.PasswordHash)
         | _ -> Assert.Fail()
@@ -100,13 +99,13 @@ type DynamoDbAccountDALTests() =
     member this.``Should Not Change Password When Invalid Password`` () =
         let account = getacc()
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
-        let result = getTestee().ChangePassword account.Username "wrong" "xxx" |> Async.RunSynchronously
+        let result = getTestee().ChangePassword account.Login "wrong" "xxx" |> Async.RunSynchronously
         match result with
         | PasswordResult.PasswordInvalid -> Assert.Pass()
         | _ -> Assert.Fail()
 
     [<Test>]
-    member this.``Should Not Change Password When Invalid Username`` () =
+    member this.``Should Not Change Password When Invalid Login`` () =
         let account = getacc()
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
         let result = getTestee().ChangePassword "wrong" account.PasswordHash "xxx" |> Async.RunSynchronously
@@ -119,13 +118,13 @@ type DynamoDbAccountDALTests() =
         let account = getacc()
         let newPasswordHash = "ph2"
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
-        let result = getTestee().ResetPassword account.Username newPasswordHash |> Async.RunSynchronously
+        let result = getTestee().ResetPassword account.Login newPasswordHash |> Async.RunSynchronously
         match result with
         | UpdateResult.Account a -> Assert.AreEqual(newPasswordHash, a.PasswordHash)
         | _ -> Assert.Fail()
 
     [<Test>]
-    member this.``Should Not Reset Password When Invalid Username`` () =
+    member this.``Should Not Reset Password When Invalid Login`` () =
         let account = getacc()
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
         let result = getTestee().ResetPassword "wrong" "xxx" |> Async.RunSynchronously
@@ -138,13 +137,13 @@ type DynamoDbAccountDALTests() =
         let account = getacc()
         let tags = [ ("tag", "value") ; ("tag3", "value3") ] |> Map.ofSeq
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
-        let result = getTestee().UpdateTags account.Username tags |> Async.RunSynchronously
+        let result = getTestee().UpdateTags account.Login tags |> Async.RunSynchronously
         match result with
         | UpdateResult.Account a -> Assert.AreEqual(tags, a.Tags)
         | _ -> Assert.Fail()
 
     [<Test>]
-    member this.``Should Not Update Tags When Invalid Username`` () =
+    member this.``Should Not Update Tags When Invalid Login`` () =
         let account = getacc()
         let tags = [ ("tag", "value") ; ("tag3", "value3") ] |> Map.ofSeq
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
@@ -158,8 +157,8 @@ type DynamoDbAccountDALTests() =
         let account = getacc()
         do getTestee().CreateAccount account |> Async.RunSynchronously |> ignore
         let newPasswordHash = "ph2"
-        do getTestee().ChangePassword account.Username account.PasswordHash newPasswordHash |> Async.RunSynchronously |> ignore
-        let result = getTestee().VerifyPassword account.Username newPasswordHash |> Async.RunSynchronously
+        do getTestee().ChangePassword account.Login account.PasswordHash newPasswordHash |> Async.RunSynchronously |> ignore
+        let result = getTestee().VerifyPassword account.Login newPasswordHash |> Async.RunSynchronously
         match result with
         | PasswordResult.Account a -> Assert.AreEqual(newPasswordHash, a.PasswordHash)
         | _ -> Assert.Fail()

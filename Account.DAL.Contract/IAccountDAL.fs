@@ -1,14 +1,15 @@
 ﻿namespace Account.DAL
 
+open System.Threading.Tasks
+
 type Account = 
-    { Username: string
-      Email: string
+    { Login: string
       PasswordHash: string
       Tags: Map<string, string> }
 
 type CreateAccountResult =
     | Account of Account
-    | UsernameAlreadyExists
+    | LoginAlreadyExists
 
 type PasswordResult = 
     | Account of Account
@@ -23,19 +24,35 @@ type IAccountDAL =
         account: Account ->
         Async<CreateAccountResult>
     abstract member VerifyPassword:
-        username: string -> 
+        login: string -> 
         passwordHash: string -> 
         Async<PasswordResult>
     abstract member ChangePassword:
-        username: string ->
+        login: string ->
         passwordHash: string ->
         newPasswordHash: string ->
         Async<PasswordResult>
     abstract member ResetPassword:
-        username: string ->
+        login: string ->
         newPasswordHash: string ->
         Async<UpdateResult>
     abstract member UpdateTags:
-        username: string ->
+        login: string ->
         tags: Map<string, string> ->
         Async<UpdateResult>
+
+    abstract member CreateAccountAsync: 
+        account: Account ->
+        Task<CreateAccountResult>
+    abstract member VerifyPasswordAsync:
+        login: string * passwordHash: string ->
+        Task<PasswordResult>
+    abstract member ChangePasswordAsync:
+        login: string * passwordHash: string * newPasswordHash: string ->
+        Task<PasswordResult>
+    abstract member ResetPasswordAsync:
+        login: string * newPasswordHash: string ->
+        Task<UpdateResult>
+    abstract member UpdateTagsAsync:
+        login: string * tags: Map<string, string> ->
+        Task<UpdateResult>
